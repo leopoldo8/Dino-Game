@@ -10,11 +10,11 @@ class Game extends React.Component {
         this.canvas = React.createRef();
         this.options = {
             stopGame: false,
-            gravity: 1,
+            gravity: .8,
             attempKeydown: false,
             groundY: 170,
             groundSpeedX: 1,
-            timestamp: 6,
+            timestamp: 5,
             player: {},
         }
     }
