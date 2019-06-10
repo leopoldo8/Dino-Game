@@ -8,13 +8,18 @@ class Game extends React.Component {
         super(props);
 
         this.canvas = React.createRef();
+
+        this.sprites = {
+            player: React.createRef(),
+        }
+
         this.options = {
             stopGame: false,
-            gravity: .8,
+            gravity: .5,
             attempKeydown: false,
             groundY: 170,
             groundSpeedX: 1,
-            timestamp: 5,
+            timestamp: 3,
             player: {},
         }
     }
@@ -47,7 +52,7 @@ class Game extends React.Component {
                 this.player.draw(); //prevent obstacles clear the player
             });
 
-            if (this.options.timestamp > 10) this.options.timestamp -= 0.0001;
+            if (this.options.timestamp > 1) this.options.timestamp -= 0.01;
             if (!this.options.stopGame) move();
         }, this.options.timestamp);
 
@@ -62,7 +67,7 @@ class Game extends React.Component {
 
             this.count = setInterval(() => {
                 this.options.player.timebetween++;
-                if (this.options.player.timebetween >= 27) this.options.player.higherjump = true;
+                if (this.options.player.timebetween >= 25) this.options.player.higherjump = true;
             }, 1);
 
             e = e || window.event;
