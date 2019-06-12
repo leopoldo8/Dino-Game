@@ -7,6 +7,10 @@ class Game extends React.Component {
     constructor(props) {
         super(props);
 
+        this.state = {
+            score: 0,
+        }
+
         this.canvas = React.createRef();
 
         this.sprites = {
@@ -17,9 +21,10 @@ class Game extends React.Component {
             stopGame: false,
             gravity: .5,
             attempKeydown: false,
-            groundY: 170,
-            groundSpeedX: 1,
+            groundY: 200,
+            groundSpeedX: 1.1,
             timestamp: 3,
+            width: 900,
             player: {},
         }
     }
@@ -43,6 +48,17 @@ class Game extends React.Component {
 
     init() {
         this.moveGround();
+        this.scoreAdd();
+    }
+
+    scoreAdd() {
+        let a = setInterval(() => {
+            this.setState({
+                score: this.state.score + 1,
+            });
+            if (this.options.stopGame) clearInterval(a);
+            // console.log(this.score);
+        }, 100);
     }
 
     moveGround() {
@@ -52,8 +68,8 @@ class Game extends React.Component {
                 this.player.draw(); //prevent obstacles clear the player
             });
 
-            if (this.options.timestamp > 1) this.options.timestamp -= 0.01;
             if (!this.options.stopGame) move();
+            this.options.groundSpeedX += .0001
         }, this.options.timestamp);
 
         move();
@@ -82,13 +98,13 @@ class Game extends React.Component {
                         this.handleActions(this.player.jump, this.player, this.options.player.higherjump);
                     }, 100);
                     break;
-                    
+
                 case 39: // right
                     break;
-                
+
                 case 40: // down
                     break;
-                
+
                 default: return; // exit this handler for other keys
             }
         }
@@ -113,7 +129,8 @@ class Game extends React.Component {
         return (
             <div>
                 <button onClick={this.stop.bind(this)}>Stop</button>
-                <canvas ref={this.canvas} id="game" width="900" height="200" />
+                <canvas ref={ this.canvas } id="game" width={ this.options.width } height="250" />
+                <p>{ this.state.score }</p>
             </div>
         )
     }
