@@ -27,7 +27,7 @@ class Game extends React.Component {
             attempKeydown: false,
             groundY: 225,
             groundSpeedX: 1.4,
-            groundSpeedXDefault: 1.1,
+            groundSpeedXDefault: 1.4,
             timestamp: 3,
             width: 900,
             ctx: {},
