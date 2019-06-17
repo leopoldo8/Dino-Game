@@ -26,7 +26,7 @@ class Game extends React.Component {
             gravity: .75,
             attempKeydown: false,
             groundY: 225,
-            groundSpeedX: 1.1,
+            groundSpeedX: 1.4,
             groundSpeedXDefault: 1.1,
             timestamp: 3,
             width: 900,

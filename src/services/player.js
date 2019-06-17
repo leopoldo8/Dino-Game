@@ -30,7 +30,7 @@ class Player {
         const { x, y, width, height } = this.params;
 
         if (this.params.timeStemp >= this.params.timestempMin) {
-            if (this.params.timestempMin > 10) this.params.timestempMin -= this.options.groundSpeedX/30;
+            if (this.params.timestempMin > 15) this.params.timestempMin -= this.options.groundSpeedX/30;
             switch(this.params.dinoStep % 2) {
                 case 0:
                     this.params.dinoIMG = DinoStepOne;
@@ -53,7 +53,10 @@ class Player {
             this.params.timeStemp++;
         }
 
-        if (staticImage) this.params.dinoIMG = DinoStatic;
+        if (staticImage) {
+            this.params.dinoIMG = DinoStatic;
+            this.params.timeStemp = 0;
+        }
 
         let playerSprite = new Image(width, height);
         playerSprite.src = this.params.dinoIMG;

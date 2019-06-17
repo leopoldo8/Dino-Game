@@ -20,7 +20,7 @@ class obstacles {
             if (this.obstacles.length < 10) {
                 let repeat = Math.round(Math.random() * (3 - 1) + 1);
                 while (repeat) {
-                    this.options.x += Math.random() * (600 - 350) + 350;
+                    this.options.x += Math.random() * (500 - 250) + 250;
                     this.options.type = Math.round(Math.random() * 5);
                     this.obstacles.push(new Obstacle(this.ctx, this.options));
                     repeat--;

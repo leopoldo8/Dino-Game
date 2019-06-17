@@ -8,14 +8,16 @@ class Ground {
             y: this.options.groundY,
             width: 900,
             height: 1,
+            color: "#535353",
         }
 
         this.draw();
     }
 
     draw() {
-        const { x, y, width, height } = this.params;
+        const { x, y, width, height, color } = this.params;
 
+        this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
     }
 }
