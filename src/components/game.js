@@ -11,7 +11,11 @@ class Game extends React.Component {
             score: 0,
         }
 
-        this.canvas = React.createRef();
+        this.canvas = {
+            game: React.createRef(),
+            obstacles: React.createRef(),
+            player: React.createRef(),
+        }
 
         this.sprites = {
             player: React.createRef(),
@@ -19,21 +23,27 @@ class Game extends React.Component {
 
         this.options = {
             stopGame: false,
-            gravity: .5,
+            gravity: .75,
             attempKeydown: false,
-            groundY: 200,
+            groundY: 225,
             groundSpeedX: 1.1,
+            groundSpeedXDefault: 1.1,
             timestamp: 3,
             width: 900,
+            ctx: {},
             player: {},
         }
     }
 
     componentDidMount() {
-        this.ctx = this.canvas.current.getContext("2d");
-        this.player = new Player(this.ctx, this.options);
+        this.ctx = this.canvas.game.current.getContext("2d");
         this.ground = new Ground(this.ctx, this.options);
-        this.obstacles = new Obstacles(this.ctx, this.options);
+
+        this.options.ctx.obstacles = this.canvas.obstacles.current.getContext("2d", { alpha: true });
+        this.obstacles = new Obstacles(this.options.ctx.obstacles, this.options);
+
+        this.options.ctx.player = this.canvas.player.current.getContext("2d", { alpha: true });
+        this.player = new Player(this.options.ctx.player, this.options);
 
         this.objectsMoving = ["obstacles"];
 
@@ -63,13 +73,13 @@ class Game extends React.Component {
 
     moveGround() {
         const move = () => setTimeout(() => {
+            this.player.draw();
             this.objectsMoving.forEach(el => {
                 this[el].move(this.options.groundSpeedX);
-                this.player.draw(); //prevent obstacles clear the player
             });
 
             if (!this.options.stopGame) move();
-            this.options.groundSpeedX += .0001
+            this.options.groundSpeedX += .00022
         }, this.options.timestamp);
 
         move();
@@ -83,8 +93,8 @@ class Game extends React.Component {
 
             this.count = setInterval(() => {
                 this.options.player.timebetween++;
-                if (this.options.player.timebetween >= 25) this.options.player.higherjump = true;
-            }, 1);
+                if (this.options.player.timebetween >= 5) this.options.player.higherjump = true;
+            }, .1);
 
             e = e || window.event;
             switch (e.which || e.keyCode) {
@@ -96,7 +106,7 @@ class Game extends React.Component {
                     setTimeout(async () => {
                         clearInterval(this.count);
                         this.handleActions(this.player.jump, this.player, this.options.player.higherjump);
-                    }, 100);
+                    }, 10);
                     break;
 
                 case 39: // right
@@ -127,9 +137,11 @@ class Game extends React.Component {
 
     render() {
         return (
-            <div>
+            <div id="stage">
                 <button onClick={this.stop.bind(this)}>Stop</button>
-                <canvas ref={ this.canvas } id="game" width={ this.options.width } height="250" />
+                <canvas ref={ this.canvas.game } id="game" width={ this.options.width } height="250" />
+                <canvas ref={ this.canvas.obstacles } id="obstacles" width={ this.options.width } height="250" />
+                <canvas ref={ this.canvas.player } id="player" width={this.options.width} height="250" />
                 <p>{ this.state.score }</p>
             </div>
         )

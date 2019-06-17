@@ -47,7 +47,7 @@ class obstacle {
             default: break;
         }
 
-        this.params.y = this.options.groundY - this.params.height;
+        this.params.y = this.options.groundY - this.params.height + 15;
         this.params.groundX = this.options.x + this.params.x;
 
         this.draw();

@@ -2,11 +2,21 @@ class Ground {
     constructor(ctx, options) {
         this.ctx = ctx;
         this.options = options;
+
+        this.params = {
+            x: 0,
+            y: this.options.groundY,
+            width: 900,
+            height: 1,
+        }
+
         this.draw();
     }
 
     draw() {
-        this.ctx.fillRect(0, this.options.groundY, 900, 1);
+        const { x, y, width, height } = this.params;
+
+        this.ctx.fillRect(x, y, width, height);
     }
 }
 

@@ -17,7 +17,7 @@ class obstacles {
 
     mount() {
         const generateObstacles = setInterval(() => {
-            if (this.obstacles.length < 7) {
+            if (this.obstacles.length < 10) {
                 let repeat = Math.round(Math.random() * (3 - 1) + 1);
                 while (repeat) {
                     this.options.x += Math.random() * (600 - 350) + 350;
@@ -33,7 +33,7 @@ class obstacles {
 
     remove() {
         this.obstacles.forEach((obstacle, i) => {
-            if (obstacle.params.x < -70) {
+            if (obstacle.params.x <= -obstacle.params.width) {
                 //out of the canvas
                 this.obstacles.splice(i, 1);
                 obstacle.delete();
