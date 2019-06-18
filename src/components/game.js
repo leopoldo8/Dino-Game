@@ -22,7 +22,7 @@ class Game extends React.Component {
         }
 
         this.options = {
-            stopGame: false,
+            stopGame: true,
             gravity: .75,
             attempKeydown: false,
             groundY: 225,
@@ -48,7 +48,6 @@ class Game extends React.Component {
         this.objectsMoving = ["obstacles"];
 
         this.handleKeys();
-        this.init();
     }
 
     stop() {
@@ -57,6 +56,7 @@ class Game extends React.Component {
     }
 
     init() {
+        this.options.stopGame = false;
         this.moveGround();
         this.scoreAdd();
     }
@@ -73,8 +73,9 @@ class Game extends React.Component {
 
     moveGround() {
         const move = () => setTimeout(() => {
-            this.player.draw();
             this.objectsMoving.forEach(el => {
+                if (!this.player.params.duck) this.player.draw();
+                else this.player.draw(this.player.params.dinoIMG);
                 this[el].move(this.options.groundSpeedX);
             });
 
@@ -102,6 +103,7 @@ class Game extends React.Component {
                     break;
 
                 case 38: // up
+                    if (this.options.stopGame) this.init();
                     this.options.attempKeydown = true;
                     setTimeout(async () => {
                         clearInterval(this.count);
@@ -113,6 +115,7 @@ class Game extends React.Component {
                     break;
 
                 case 40: // down
+                    this.handleActions(this.player.duck, this.player);
                     break;
 
                 default: return; // exit this handler for other keys
@@ -121,6 +124,11 @@ class Game extends React.Component {
 
         document.onkeyup = () => {
             if (this.count) clearInterval(this.count);
+            if (this.player.params.duck) {
+                this.player.params.duck = false;
+                this.player.params.timestempMin = 33;
+                this.player.normalDraw();
+            }
         }
     }
 
