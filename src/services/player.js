@@ -16,7 +16,7 @@ class Player {
             height: 50,
             speed: 13,
             acc: 0,
-            timestempMin: 33,
+            timestempMin: 28,
             dinoStep: 0,
             timeStemp: 0,
             dinoIMG: DinoStatic,
@@ -35,7 +35,7 @@ class Player {
 
     clear() {
         const { x, y, width, height } = this.params;
-        this.ctx.clearRect(x, y, width, height + 5);
+        this.ctx.clearRect(x, y, width, height + 10);
     }
 
     draw(staticImage, clear) {
@@ -44,8 +44,13 @@ class Player {
         this.clear();
         const { x, y, width, height } = this.params;
 
-        if (this.params.timestempMin > 18) this.params.timestempMin -= this.options.groundSpeedX/30;
-        if ((this.params.timeStemp >= this.params.timestempMin) && !staticImage) {
+        if (this.params.timestempMin > 18) this.params.timestempMin -= this.options.groundSpeedX / 30;
+
+        if (staticImage) {
+            this.params.dinoIMG = staticImage;
+            this.params.timeStemp++;
+            if (clear) this.params.timeStemp = 0;
+        } else if (this.params.timeStemp >= this.params.timestempMin) {
             switch(this.params.dinoStep % 2) {
                 case 0:
                     this.params.dinoIMG = DinoStepOne;
@@ -68,22 +73,19 @@ class Player {
             this.params.timeStemp++;
         }
 
-        if (staticImage) {
-            this.params.dinoIMG = staticImage;
-            if (clear) this.params.timeStemp = 0;
-        }
-
-        let playerSprite = new Image(width, height);
+        const playerSprite = new Image(width, height);
         playerSprite.src = this.params.dinoIMG;
 
         this.ctx.drawImage(playerSprite, x, y, width, height);
     }
 
     jump(higherJump) {
+        if (this.params.duck) return;
+
         if (higherJump[0]) {
-            this.params.speed = 13; //higher jump
+            this.params.speed = 14; //higher jump
         } else {
-            this.params.speed = 11.5;
+            this.params.speed = 12;
         }
 
         return new Promise((resolve, reject) => {
@@ -108,30 +110,26 @@ class Player {
             switch (this.params.dinoStep % 2) {
                 case 0:
                     this.params.dinoIMG = DinoDuckStepOne;
-                    this.params.timeStemp = 0;
-                    this.params.dinoStep++;
                     break;
                 case 1:
                     this.params.dinoIMG = DinoDuckStepTwo;
-                    this.params.timeStemp = 0;
-                    this.params.dinoStep++;
                     break;
 
                 default:
                     this.params.dinoIMG = DinoStatic;
-                    this.params.timeStemp = 0;
-                    this.params.dinoStep++;
                     break;
             }
-        }
 
+            this.params.timeStemp = 0;
+            this.params.dinoStep++;
+        }
 
         if (!this.params.duck) {
             this.params.duck = true;
             moveDucked();
         }
 
-        if (this.params.timeStemp >= this.params.timestempMin) {
+        if (this.params.timeStemp >= this.params.timestempMin + 5) {
             moveDucked();
         }
     }

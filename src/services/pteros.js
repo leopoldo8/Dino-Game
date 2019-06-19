@@ -1,6 +1,6 @@
-import Obstacle from './obstacle';
+import Obstacle from './pterodactyl';
 
-class obstacles {
+class Pterus {
     constructor(ctx, options) {
         this.ctx = ctx;
         this.options = options;
@@ -17,10 +17,12 @@ class obstacles {
 
     mount() {
         const generateObstacles = setInterval(() => {
-            if (this.obstacles.length < 4) {
-                let repeat = Math.round(Math.random() * (3 - 1) + 1);
+            if (this.options.groundSpeedX < 3) return;
+            if (this.obstacles.length < 3) {
+                let repeat = Math.round(Math.random() * (2 - 1) + 2);
                 while (repeat) {
-                    this.options.x += Math.random() * (600 - 250) + 250;
+                    this.options.x += Math.random() * (1700 - 1000) + 1000;
+                    this.options.y = Math.random() * (180 - 60) + 60;
                     this.options.type = Math.round(Math.random() * 5);
                     this.obstacles.push(new Obstacle(this.ctx, this.options));
                     repeat--;
@@ -28,7 +30,7 @@ class obstacles {
             }
             this.remove();
             if (this.options.StopGame) clearInterval(generateObstacles);
-        }, 300);
+        }, 700);
     }
 
     remove() {
@@ -46,9 +48,10 @@ class obstacles {
 
     move(value) {
         this.obstacles.forEach(obstacle => {
+            this.options.groundSpeedX = value;
             obstacle.move(value);
         });
     }
 }
 
-export default obstacles;
+export default Pterus;

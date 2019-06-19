@@ -2,6 +2,7 @@ import React from 'react';
 import Player from '../services/player';
 import Ground from '../services/ground';
 import Obstacles from '../services/obstacles';
+import Pteros from '../services/pteros';
 
 class Game extends React.Component {
     constructor(props) {
@@ -23,13 +24,15 @@ class Game extends React.Component {
 
         this.options = {
             stopGame: true,
-            gravity: .75,
+            gravity: .85,
             attempKeydown: false,
             groundY: 225,
             groundSpeedX: 1.4,
             groundSpeedXDefault: 1.4,
             timestamp: 3,
             width: 900,
+            toWaitAction: false,
+            lastAction: null,
             ctx: {},
             player: {},
         }
@@ -41,11 +44,12 @@ class Game extends React.Component {
 
         this.options.ctx.obstacles = this.canvas.obstacles.current.getContext("2d", { alpha: true });
         this.obstacles = new Obstacles(this.options.ctx.obstacles, this.options);
+        this.pteros = new Pteros(this.options.ctx.obstacles, this.options);
 
         this.options.ctx.player = this.canvas.player.current.getContext("2d", { alpha: true });
         this.player = new Player(this.options.ctx.player, this.options);
 
-        this.objectsMoving = ["obstacles"];
+        this.objectsMoving = ["obstacles", "pteros"];
 
         this.handleKeys();
     }
@@ -68,37 +72,45 @@ class Game extends React.Component {
             });
             if (this.options.stopGame) clearInterval(a);
             // console.log(this.score);
-        }, 100);
+        }, 125);
     }
 
     moveGround() {
         const move = () => setTimeout(() => {
+            if (!this.player.params.duck) this.player.draw();
+            else this.player.draw(this.player.params.dinoIMG);
             this.objectsMoving.forEach(el => {
-                if (!this.player.params.duck) this.player.draw();
-                else this.player.draw(this.player.params.dinoIMG);
                 this[el].move(this.options.groundSpeedX);
             });
 
             if (!this.options.stopGame) move();
-            this.options.groundSpeedX += .00022
+            this.options.groundSpeedX += .00015
         }, this.options.timestamp);
 
         move();
     }
 
-    handleKeys() {
+    handleKeys(key) {
         this.options.player.timebetween = 0;
         this.options.player.higherjump = false;
         document.onkeydown = async (e) => {
-            if (this.options.attempKeydown) return;
+            e = e || window.event;
+            let event = key ? key : (e.which || e.keyCode);
+
+            if (this.options.attempKeydown && event !== this.options.lastAction) {
+                if (this.options.lastAction !== null) {
+                    event = this.options.lastAction;
+                } else {
+                    return;
+                }
+            }
 
             this.count = setInterval(() => {
                 this.options.player.timebetween++;
                 if (this.options.player.timebetween >= 5) this.options.player.higherjump = true;
             }, .1);
 
-            e = e || window.event;
-            switch (e.which || e.keyCode) {
+            switch (event) {
                 case 37: // left
                     break;
 
@@ -107,7 +119,13 @@ class Game extends React.Component {
                     this.options.attempKeydown = true;
                     setTimeout(async () => {
                         clearInterval(this.count);
-                        this.handleActions(this.player.jump, this.player, this.options.player.higherjump);
+                        this.handleActions({
+                            action: this.player.jump,
+                            ctx: this.player,
+                            event: event,
+                            press: false,
+                            wait: true,
+                        }, this.options.player.higherjump);
                     }, 10);
                     break;
 
@@ -115,7 +133,13 @@ class Game extends React.Component {
                     break;
 
                 case 40: // down
-                    this.handleActions(this.player.duck, this.player);
+                    this.handleActions({
+                        action: this.player.duck,
+                        ctx: this.player,
+                        event: event,
+                        press: true,
+                        wait: false,
+                    });
                     break;
 
                 default: return; // exit this handler for other keys
@@ -123,24 +147,44 @@ class Game extends React.Component {
         }
 
         document.onkeyup = () => {
+            //reset interval
             if (this.count) clearInterval(this.count);
+
+            //reset player after duck
             if (this.player.params.duck) {
                 this.player.params.duck = false;
-                this.player.params.timestempMin = 33;
+                this.player.params.timestempMin = 28;
                 this.player.normalDraw();
             }
+
+            //attemp until keyup
+            if (!this.options.toWaitAction) this.options.attempKeydown = false;
+            this.options.lastAction = null;
         }
     }
 
-    async handleActions(action, ctx, ...props) {
+    async handleActions(options, ...props) {
+        const { action, ctx, event, press, wait } = options;
+
+        //no attemp actions pressing a keydown
+        if (press) this.options.lastAction = event;
+        else this.options.lastAction = null;
+
+        //attemp other action at same time
         this.options.attempKeydown = true;
+        this.options.toWaitAction = wait;
+
+        //do the action
         await action.bind(ctx)(props);
 
         //player options reset
         this.options.player.higherjump = false;
         this.options.player.timebetween = 0;
 
-        this.options.attempKeydown = false;
+        //attemp until action ends
+        if (this.options.toWaitAction) {
+            this.options.attempKeydown = false;
+        }
     }
 
     render() {
