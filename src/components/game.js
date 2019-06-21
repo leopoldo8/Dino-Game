@@ -1,7 +1,7 @@
 import React from 'react';
 import Player from '../services/player';
 import Ground from '../services/ground';
-import Obstacles from '../services/obstacles';
+import Cactus from '../services/cactus';
 import Pteros from '../services/pteros';
 
 class Game extends React.Component {
@@ -25,10 +25,11 @@ class Game extends React.Component {
         this.options = {
             stopGame: true,
             gravity: .85,
+            score: 0,
             attempKeydown: false,
             groundY: 225,
-            groundSpeedX: 1.4,
-            groundSpeedXDefault: 1.4,
+            groundSpeedX: 2.2,
+            groundSpeedXDefault: 2.2,
             timestamp: 3,
             width: 900,
             toWaitAction: false,
@@ -42,14 +43,15 @@ class Game extends React.Component {
         this.ctx = this.canvas.game.current.getContext("2d");
         this.ground = new Ground(this.ctx, this.options);
 
+        this.options.scoreAdd = this.scoreAdd.bind(this);
         this.options.ctx.obstacles = this.canvas.obstacles.current.getContext("2d", { alpha: true });
-        this.obstacles = new Obstacles(this.options.ctx.obstacles, this.options);
+        this.cactus = new Cactus(this.options.ctx.obstacles, this.options);
         this.pteros = new Pteros(this.options.ctx.obstacles, this.options);
 
         this.options.ctx.player = this.canvas.player.current.getContext("2d", { alpha: true });
         this.player = new Player(this.options.ctx.player, this.options);
 
-        this.objectsMoving = ["obstacles", "pteros"];
+        this.objectsMoving = ["cactus", "pteros"];
 
         this.handleKeys();
     }
@@ -62,31 +64,34 @@ class Game extends React.Component {
     init() {
         this.options.stopGame = false;
         this.moveGround();
-        this.scoreAdd();
+        this.options.scoreAdd();
     }
 
-    scoreAdd() {
+    async scoreAdd() {
         let a = setInterval(() => {
-            this.setState({
-                score: this.state.score + 1,
+            this.setState(prevstate => {
+                this.options.score = prevstate.score + 1;
+                return {
+                    score: this.options.score,
+                }
             });
+
             if (this.options.stopGame) clearInterval(a);
-            // console.log(this.score);
+            if (this.options.score >= 400) return true;
         }, 125);
     }
 
     moveGround() {
-        const move = () => setTimeout(() => {
+        const move = () => setInterval(() => {
             if (!this.player.params.duck) this.player.draw();
             else this.player.draw(this.player.params.dinoIMG);
             this.objectsMoving.forEach(el => {
                 this[el].move(this.options.groundSpeedX);
             });
 
-            if (!this.options.stopGame) move();
-            this.options.groundSpeedX += .00015
-        }, this.options.timestamp);
-
+            if (this.options.stopGame) clearInterval(move);
+            this.options.groundSpeedX += .0015
+        }, 16);
         move();
     }
 
